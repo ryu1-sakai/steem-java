@@ -1,1 +1,10 @@
+apply plugin: 'checkstyle'
 apply plugin: 'java'
+
+repositories {
+    mavenCentral()
+}
+
+checkstyle {
+    toolVersion = "8.12"
+}
