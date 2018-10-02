@@ -1,17 +1,21 @@
 package com.ryu1sakai.steem.client.model;
 
-import java.util.List;
+import com.google.api.client.util.Key;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
 @Data
 @Accessors(chain = true)
 public class SteemRpcRequest {
+  @Key
   private String jsonrpc;
 
+  @Key
   private long id;
 
+  @Key
   private String method;
 
-  private List<?> params;
+  @Key
+  private Object params;
 }

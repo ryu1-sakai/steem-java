@@ -21,8 +21,26 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok:1.18.2'
 
     // Test
+    testImplementation 'com.google.http-client:google-http-client-jackson2:1.25.0'
     testImplementation 'junit:junit:4.12'
     testImplementation 'org.apache.commons:commons-lang3:3.8.1'
     testImplementation 'org.assertj:assertj-core:3.11.1'
     testImplementation 'org.mockito:mockito-core:2.22.0'
+}
+
+sourceSets {
+    integrationTest {
+        java.srcDir file('src/integrationTest/java')
+    }
+}
+
+dependencies {
+    integrationTestImplementation sourceSets.main.output
+    integrationTestImplementation sourceSets.test.output
+    integrationTestImplementation configurations.testImplementation
+}
+
+task integrationTest(type: Test) {
+    testClassesDirs = sourceSets.integrationTest.output.classesDirs
+    classpath = sourceSets.integrationTest.runtimeClasspath
 }

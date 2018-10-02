@@ -50,7 +50,7 @@ public class SteemCallParameter {
         .setJsonrpc(JSON_RPC)
         .setId(id)
         .setMethod(api + '.' + method)
-        .setParams(condenserParams);
+        .setParams(appbaseParams);
   }
 
   public SteemRpcRequest forCondenserApi() {

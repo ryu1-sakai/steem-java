@@ -21,6 +21,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -98,6 +99,26 @@ public class SteemHttpClient implements Closeable {
     return false;
   }
 
+  @VisibleForTesting
+  Single<SteemRpcResponse> callRpc(GenericUrl url, SteemRpcRequest request) {
+    return Single
+            .fromCallable(() -> {
+              HttpContent content = new JsonHttpContent(jsonFactory, request);
+              HttpRequest httpRequest = httpRequestFactory.buildPostRequest(url, content);
+              httpRequest.setParser(jsonFactory.createJsonObjectParser());
+              return httpRequest.execute();
+            })
+            .flatMap(response -> {
+              if (!isSuccessStatusCode(response.getStatusCode())) {
+                String message = String.format("Non-success status %s <%s> from <%s>",
+                        response.getStatusCode(), response.getStatusMessage(), url);
+                logger.warn(message);
+                return Single.error(new RecoverableRpcErrorException(message));
+              }
+              return Single.just(response.parseAs(SteemRpcResponse.class));
+            });
+  }
+
   private Single<SteemCallResult> callOneNode(SteemNode node, SteemCallParameter requestParam) {
     GenericUrl url = node.getUrl();
     boolean usingAppbaseApi = node.isAppbaseApiSupported();
@@ -117,24 +138,6 @@ public class SteemHttpClient implements Closeable {
                 }
               }
               return Single.error(handleResponseError(response.getError(), node));
-            });
-  }
-
-  private Single<SteemRpcResponse> callRpc(GenericUrl url, SteemRpcRequest request) {
-    return Single
-            .fromCallable(() -> {
-              HttpContent content = new JsonHttpContent(jsonFactory, request);
-              HttpRequest httpRequest = httpRequestFactory.buildPostRequest(url, content);
-              return httpRequest.execute();
-            })
-            .flatMap(response -> {
-              if (!isSuccessStatusCode(response.getStatusCode())) {
-                String message = String.format("Non-success status %s <%s> from <%s>",
-                        response.getStatusCode(), response.getStatusMessage(), url);
-                logger.warn(message);
-                return Single.error(new RecoverableRpcErrorException(message));
-              }
-              return Single.just(response.parseAs(SteemRpcResponse.class));
             });
   }
 

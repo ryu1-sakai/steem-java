@@ -4,5 +4,5 @@ import lombok.Value;
 
 @Value(staticConstructor = "of")
 public class SteemCallResult {
-  private String result;
+  private Object result;
 }
